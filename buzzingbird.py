@@ -229,12 +229,15 @@ def register():
             error = 'The two passwords do not match'
         elif get_user_id(request.form['username']) is not None:
             error = 'The username is already taken'
+        elif request.form['pub_key']:
+            error = 'The public key is not filled in.'
         else:
             db = get_db()
             db.execute('''insert into user (
-              username, email, pw_hash) values (?, ?, ?)''',
+              username, email, pw_hash, pub_key) values (?, ?, ?, ?)''',
               [request.form['username'], request.form['email'],
-               generate_password_hash(request.form['password'])])
+               generate_password_hash(request.form['password']),
+               request.form['pub_key']])
             db.commit()
             flash('You were successfully registered and can login now')
             return redirect(url_for('login'))

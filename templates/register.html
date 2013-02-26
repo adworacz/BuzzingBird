@@ -13,6 +13,8 @@
       <dd><input type=password name=password size=30>
       <dt>Password <small>(repeat)</small>:
       <dd><input type=password name=password2 size=30>
+      <dt>Public Key:
+      <dd><input type=text name=pub_key size=64>
     </dl>
     <div class=actions><input type=submit value="Sign Up"></div>
   </form>
@@ -28,5 +30,14 @@
       var MattsRSAkey = cryptico.generateRSAKey(Bits, Exponent);
 
       console.log(sha1.hex("I'm a teacup"));
+
+      var message = "I'm a teacup.";
+
+      var privEncrypted = cryptico.encryptPrivate(message, MattsRSAkey);
+      console.log(privEncrypted);
+
+      var pubDecrypted = cryptico.decryptPublic(privEncrypted.cipher, MattsRSAkey);
+      console.log(pubDecrypted);
+
    </script>
 {% endblock %}
