@@ -30,4 +30,6 @@
     BuzzingBird &mdash; A Flask Application
   </div>
 </div>
-{% include 'footer.html' %}
+{% block footer %}
+   <script type="text/javascript" src="{{ url_for('static', filename='js/cryptico/cryptico.js') }}"></script>
+{% endblock %}

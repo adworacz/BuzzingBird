@@ -17,3 +17,16 @@
     <div class=actions><input type=submit value="Sign Up"></div>
   </form>
 {% endblock %}
+
+{% block footer %}
+  {{ super() }}
+   <script type="text/javascript">
+      // The length of the RSA key, in bits.
+      var Bits = 1024;
+      var Exponent = "03";
+
+      var MattsRSAkey = cryptico.generateRSAKey(Bits, Exponent);
+
+      console.log(sha1.hex("I'm a teacup"));
+   </script>
+{% endblock %}
