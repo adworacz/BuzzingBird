@@ -3,7 +3,8 @@ create table user (
   user_id integer primary key autoincrement,
   username text not null,
   email text not null,
-  pw_hash text not null
+  pw_hash text not null,
+  pub_key text not null
 );
 
 drop table if exists follower;
