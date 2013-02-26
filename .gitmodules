@@ -1,3 +1,6 @@
 [submodule "static/js/titanium-core"]
 	path = static/js/titanium-core
 	url = https://github.com/iambumblehead/titanium-core.git
+[submodule "static/js/cryptico"]
+	path = static/js/cryptico
+	url = https://github.com/wwwtyro/cryptico.git
