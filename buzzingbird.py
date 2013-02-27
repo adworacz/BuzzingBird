@@ -159,6 +159,22 @@ def follow_user(username):
     return redirect(url_for('user_timeline', username=username))
 
 
+@app.route('/<username>/request_follow/<request_token>')
+def request_follow(username, request_token):
+    """Submits a request to a specific user for a given request_token (encrypted hashtag)."""
+    if not g.user:
+        abort(401)
+    whom_id = get_user_id(username)
+    if whom_id is None:
+        abort(404)
+    # db = get_db()
+    # db.execute('insert into follower (who_id, whom_id) values (?, ?)',
+    #           [session['user_id'], whom_id])
+    # db.commit()
+    flash('Follow request sent to "%s".' % username)
+    return redirect(url_for('timeline'))
+
+
 @app.route('/<username>/unfollow')
 def unfollow_user(username):
     """Removes the current user as follower of the given user."""
