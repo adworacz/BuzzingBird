@@ -3,7 +3,7 @@
 {% block body %}
   <h2>Sign Up</h2>
   {% if error %}<div class=error><strong>Error:</strong> {{ error }}</div>{% endif %}
-  <form action="" method=post>
+  <form action="" method=post id="registration_form">
     <dl>
       <dt>Username:
       <dd><input type=text name=username size=30 value="{{ request.form.username }}">
@@ -14,7 +14,7 @@
       <dt>Password <small>(repeat)</small>:
       <dd><input type=password name=password2 size=30>
       <dt>Public Key:
-      <dd><input type=text name=pub_key size=64>
+      <dd><input type=text name=pubkey size=64>
     </dl>
     <div class=actions><input type=submit value="Sign Up"></div>
   </form>
@@ -27,17 +27,10 @@
       var Bits = 1024;
       var Exponent = "03";
 
-      var MattsRSAkey = cryptico.generateRSAKey(Bits, Exponent);
+      var generatedRSAKey = cryptico.generateRSAKey(Bits, Exponent);
 
-      console.log(sha1.hex("I'm a teacup"));
-
-      var message = "I'm a teacup.";
-
-      var privEncrypted = cryptico.encryptPrivate(message, MattsRSAkey);
-      console.log(privEncrypted);
-
-      var pubDecrypted = cryptico.decryptPublic(privEncrypted.cipher, MattsRSAkey);
-      console.log(pubDecrypted);
+      var regForm = document.forms['registration_form'];
+      regForm.elements['pubkey'].value = cryptico.publicKeyString(generatedRSAKey);
 
    </script>
 {% endblock %}
