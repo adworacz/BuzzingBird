@@ -1,0 +1,24 @@
+Need to implement the ability to follow a user for a specific hashtag.
+ *Need a form in a page to say userid and hashtag (well encrypted form of hashtag).
+ *need a notification or page for a user to approve follow requests (which will require the private key encryption and hashing of the request token by the followee).
+
+ Need the ability to encrypt a plaintext using a given passphrase via AES.
+ *This can be done with some code from enrypt/decrpyt Private/Public. Not all of it, as some of it creates a generated, random, AES key and then uses RSA keypair, and we just want to use our own passphrase.
+
+What will work for creating a key for tweet encryption.
+ *For a given hashtag:
+   *Hash(ht), then encrypt with public key, e.
+      *Sent to Bob from Alice.
+   *Bob then encrypts the result using his public key, d.
+      *Sent back to Alice from Bob.
+   *Alice takes result and hashes using Hash'().   fd(x) = H'(H(x) ^ d), sigma = H(x) ^ d. Which means fd(x) = H'(sigma). My sigma is actually slight different, as it's sigma = (H(x) ^ e) ^ d. Ideally, we'd have a random number r, which we multiplied H(x) by after raising r to e. Ex: H(x) • (r ^ e). Then sigma = ((H(x) • (r ^ e)) ^ d) / r.
+   *                                      ^ -> 'may' be allowed to be the same as Hash().
+   *This produces fd(x) for now. (Hummingbird uses something similar, yet distincly different, which I may be able to replicate later, but this will work for now.)
+
+   So, now we safely have fd(x).
+
+   *Token t = Hash2(sigma), where Hash2 is distinctly NOT Hash(). So Hash() can be SHA256, Hash2 can be MD5 (and should be for a decently sized token).
+   *Key k = Hash/Hash3(sigma), where Hash() can be SHA256 and Hash3() can be SHA1. Just an example.
+   *           ^ ->These might not need to be different, and can just use Hash().
+
+   * A message M is then turned into ciphertext ct by AESEnc(M) using key k.
