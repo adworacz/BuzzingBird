@@ -29,8 +29,7 @@
 
       var generatedRSAKey = cryptico.generateRSAKey(Bits, Exponent);
 
-      var regForm = document.forms['registration_form'];
-      regForm.elements['pubkey'].value = cryptico.publicKeyString(generatedRSAKey);
+      $('input:text[name=pubkey]').val(cryptico.publicKeyString(generatedRSAKey));
 
       console.log("Begin sigma and BigInt testing.");
 
