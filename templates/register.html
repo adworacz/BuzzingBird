@@ -44,7 +44,7 @@
       var hashedTag = sha256.hex("#interestingtag");
       console.log("Hashed tag: " + hashedTag);
 
-      var hashedTagBigInt = pkcs1pad2_secure(hashedTag, (generatedRSAKey.n.bitLength() + 7) >> 3);
+      var hashedTagBigInt = pkcs1pad2_deterministic(hashedTag, (generatedRSAKey.n.bitLength() + 7) >> 3);
       console.log("Hashed tag BigInteger form: " + hashedTagBigInt.toString(16));
 
       var result = hashedTagBigInt.multiply(encryptedR).mod(generatedRSAKey.n);

@@ -49,7 +49,7 @@ BuzzingBird.createRequestToken = function(hashtag, keypair, thisuser, target_use
 
    var encryptedR = keypair.doPublic(r);
    var hashedTag = sha256.hex(hashtag);
-   var hashedTagBigInt = pkcs1pad2_secure(hashedTag, (keypair.n.bitLength() + 7) >> 3);
+   var hashedTagBigInt = pkcs1pad2_deterministic(hashedTag, (keypair.n.bitLength() + 7) >> 3);
 
    var result = hashedTagBigInt.multiply(encryptedR).mod(keypair.n);
 
