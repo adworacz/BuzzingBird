@@ -32,53 +32,11 @@
       //Submit the public key to the server for other users.
       $('input:text[name=pubkey]').val(cryptico.publicKeyString(generatedRSAKey));
 
-      // //On form submit, store our private (and public key) in localStorage.
-      // $('#registration_form').submit(function(){
-      //    var username = $('input:text[name=username]').val();
-      //    BuzzingBird.storePrivateKey(username, generatedRSAKey);
-      // });
-
-
-      BuzzingBird.storePrivateKey('test_private', generatedRSAKey);
-
-      // console.log("Begin sigma and BigInt testing.");
-
-      // var randGen = new SecureRandom();
-      // var r = new BigInteger(Bits, randGen);
-
-      // console.log("Ramdomly generated R = " + r.toString(16));
-
-      // var encryptedR = generatedRSAKey.doPublic(r);
-      // console.log("Encrypted R = " + encryptedR.toString(16));
-
-      // var hashedTag = sha256.hex("#interestingtag");
-      // console.log("Hashed tag: " + hashedTag);
-
-      // var hashedTagBigInt = pkcs1pad2_deterministic(hashedTag, (generatedRSAKey.n.bitLength() + 7) >> 3);
-      // console.log("Hashed tag BigInteger form: " + hashedTagBigInt.toString(16));
-
-      // var result = hashedTagBigInt.multiply(encryptedR).mod(generatedRSAKey.n);
-      // console.log("H(x) * r ^ e = " + result.toString(16));
-
-      // var encryptedWithPrivateResult = generatedRSAKey.doPrivate(result);
-      // console.log("(H(x) * r ^ e) ^ d = " + encryptedWithPrivateResult.toString(16));
-
-      // var sigma = encryptedWithPrivateResult.multiply(r.modInverse(generatedRSAKey.n)).mod(generatedRSAKey.n);
-      // console.log("Sigma = " + sigma.toString(16));
-
-      // var secondTry = generatedRSAKey.doPrivate(hashedTagBigInt);
-      // console.log("H(x) ^ d mod n = " + secondTry.toString(16));
-
-
-      // // Test buzzinbird work.
-      // var requestToken = BuzzingBird.createRequestToken("#interestingtag", generatedRSAKey, "thisuser", "Bob", r);
-      // console.log("requestToken : " + requestToken.toString(16));
-
-      // var approvedToken = BuzzingBird.approveRequestToken(generatedRSAKey, requestToken);
-      // console.log("approvedToken : " + approvedToken.toString(16));
-
-      // var sigma = BuzzingBird.acceptRequestToken(generatedRSAKey, "thisuser", "Bob", approvedToken);
-      // console.log("sigma : " + sigma.toString(16))
+      //On form submit, store our private (and public key) in localStorage.
+      $('#registration_form').submit(function(){
+         var username = $('input:text[name=username]').val();
+         BuzzingBird.storePrivateKey(username, generatedRSAKey);
+      });
 
    </script>
 {% endblock %}
