@@ -18,7 +18,7 @@ from sqlite3 import dbapi2 as sqlite3
 from hashlib import md5
 from datetime import datetime
 from flask import Flask, request, session, url_for, redirect, \
-     render_template, abort, g, flash, _app_ctx_stack
+     render_template, abort, g, flash, _app_ctx_stack, jsonify
 from werkzeug import check_password_hash, generate_password_hash
 
 
@@ -32,6 +32,10 @@ SECRET_KEY = 'development key'
 app = Flask(__name__)
 app.config.from_object(__name__)
 app.config.from_envvar('BUZZINGBIRD_SETTINGS', silent=True)
+
+
+class TokenStatus:
+    ACCEPTED, REQUESTED, APPROVED = range(3)
 
 
 def get_db():
@@ -143,36 +147,25 @@ def user_timeline(username):
             profile_user=profile_user)
 
 
+@app.route('/_get_public_key', methods=['GET'])
+def get_public_key():
+    '''AJAX request for a particular user's public key.'''
+
+    username = request.args.get('username', type=str)
+    publicKey = query_db('''select user.pub_key from user
+            where username = ?''', [username], one=True)
+    return jsonify(pub_key=publicKey[0])
+
+
 @app.route('/<username>/follow')
 def follow_user(username):
-    """Adds the current user as follower of the given user."""
+    """Submits a follow request for the given user."""
     if not g.user:
         abort(401)
     whom_id = get_user_id(username)
     if whom_id is None:
         abort(404)
-    db = get_db()
-    db.execute('insert into follower (who_id, whom_id) values (?, ?)',
-              [session['user_id'], whom_id])
-    db.commit()
-    flash('You are now following "%s"' % username)
-    return redirect(url_for('user_timeline', username=username))
-
-
-@app.route('/<username>/request_follow/<request_token>')
-def request_follow(username, request_token):
-    """Submits a request to a specific user for a given request_token (encrypted hashtag)."""
-    if not g.user:
-        abort(401)
-    whom_id = get_user_id(username)
-    if whom_id is None:
-        abort(404)
-    # db = get_db()
-    # db.execute('insert into follower (who_id, whom_id) values (?, ?)',
-    #           [session['user_id'], whom_id])
-    # db.commit()
-    flash('Follow request sent to "%s".' % username)
-    return redirect(url_for('timeline'))
+    return render_template('request_follow.html', followuser=username)
 
 
 @app.route('/<username>/unfollow')
@@ -274,6 +267,6 @@ app.jinja_env.filters['gravatar'] = gravatar_url
 
 
 if __name__ == '__main__':
-    init_db()
+    # init_db()
     app.debug = DEBUG
     app.run()

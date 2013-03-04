@@ -10,8 +10,11 @@ create table user (
 drop table if exists follower;
 create table follower (
   who_id integer,
-  whom_id integer
+  whom_id integer,
+  token_status integer,
+  token text
 );
+-- token_status : 0 == accepted, 1 == request, 2 == approved
 
 drop table if exists message;
 create table message (
