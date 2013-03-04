@@ -3,10 +3,6 @@ var BuzzingBird = {};
 BuzzingBird.keyStorePrefix = "_privateKey_";
 BuzzingBird.requestTokenPrefix = "_requestToken_";
 
-BuzzingBird.test = function() {
-   console.log("Test successfully called.");
-};
-
 BuzzingBird.storePrivateKey = function(userid, keypair) {
    if ("object" != typeof keypair) {
       throw "An RSA keypair must be passed in.";
@@ -16,9 +12,11 @@ BuzzingBird.storePrivateKey = function(userid, keypair) {
 
    var key = this.keyStorePrefix + userid;
 
-   var rsaString = keypair.RSAtoJSON();
+   var rsaString = keypair.toJSON();
 
    $.totalStorage(key, rsaString);
+
+   console.log('Successfully stored private key.');
 };
 
 BuzzingBird.getPrivateKey = function(userid) {
@@ -28,9 +26,15 @@ BuzzingBird.getPrivateKey = function(userid) {
 
    var key = this.keyStorePrefix + userid;
 
-   var rsaString = $.totalStorage(key);
+   var rsaObject = $.totalStorage(key);
 
-   return RSAParse(rsaString);
+   var rsa = new RSAKey();
+
+   rsa.setPrivateEx(rsaObject.n, rsaObject.e, rsaObject.d, rsaObject.p, rsaObject.q, rsaObject.dmp1, rsaObject.dmq1, rsaObject.coeff);
+
+   console.log("Retrieved private key");
+
+   return rsa;
 };
 
 BuzzingBird.createRequestToken = function(hashtag, keypair, thisuser, target_user) {
