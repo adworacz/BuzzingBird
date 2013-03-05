@@ -80,6 +80,13 @@ def get_user_id(username):
     return rv[0] if rv else None
 
 
+def get_username_from_user_id(user_id):
+    '''Retrieves a username for a given user_id.'''
+    rv = query_db('''select username from user where user_id = ?''',
+            [user_id], one=True)
+    return rv[0] if rv else None
+
+
 def format_datetime(timestamp):
     """Format a timestamp for display."""
     return datetime.utcfromtimestamp(timestamp).strftime('%Y-%m-%d @ %H:%M')
@@ -107,6 +114,12 @@ def timeline():
     """
     if not g.user:
         return redirect(url_for('public_timeline'))
+
+    followRequests = query_db('''select username, token from follower, user
+            where follower.whom_id = ? and follower.token_status = ?
+            and follower.who_id = user.user_id''',
+            [session['user_id'], TokenStatus.REQUESTED])
+
     return render_template('timeline.html', messages=query_db('''
         select message.*, user.* from message, user
         where message.author_id = user.user_id and (
@@ -114,7 +127,8 @@ def timeline():
             user.user_id in (select whom_id from follower
                                     where who_id = ?))
         order by message.pub_date desc limit ?''',
-        [session['user_id'], session['user_id'], PER_PAGE]))
+        [session['user_id'], session['user_id'], PER_PAGE]),
+        follow_requests=followRequests)
 
 
 @app.route('/public')
@@ -151,13 +165,42 @@ def user_timeline(username):
 def get_public_key():
     '''AJAX request for a particular user's public key.'''
 
+    if not g.user:
+        abort(401)
+
     username = request.args.get('username', type=str)
+
+    if not username:
+        abort(400)
+
     publicKey = query_db('''select user.pub_key from user
             where username = ?''', [username], one=True)
     return jsonify(pub_key=publicKey[0])
 
 
-@app.route('/<username>/follow')
+@app.route('/_approve_token', methods=['GET'])
+def approve_token():
+    '''AJAX request to approve a particular follow request.'''
+
+    if not g.user:
+        abort(401)
+
+    approved_username = request.args.get('approved_username', type=str)
+    approved_token = request.args.get('approved_token', type=str)
+
+    if not approved_username or not approved_token:
+        abort(400)
+
+    db = get_db()
+    db.execute('''update follower set token_status = ?, token = ?
+            where who_id = ? and whom_id = ?''',
+            [TokenStatus.APPROVED, approved_token, get_user_id(approved_username), session['user_id']])
+    db.commit()
+
+    return jsonify(result="success")
+
+
+@app.route('/<username>/follow', methods=['GET', 'POST'])
 def follow_user(username):
     """Submits a follow request for the given user."""
     if not g.user:
@@ -165,7 +208,23 @@ def follow_user(username):
     whom_id = get_user_id(username)
     if whom_id is None:
         abort(404)
-    return render_template('request_follow.html', followuser=username)
+
+    error = None
+    if request.method == 'POST':
+        if not request.form['username']:
+            error = "You must enter a user to follow."
+        elif not request.form['hashtag']:
+            error = "You must enter a valid hashtag."
+        elif not request.form['token']:
+            error = "You must generate a valid token from your hashtag."
+        else:
+            db = get_db()
+            db.execute('''insert into follower (who_id, whom_id, token_status, token) values (?, ?, ?, ?)''',
+                [session['user_id'], whom_id, TokenStatus.REQUESTED, request.form['token']])
+            db.commit()
+            flash('You successfully submitted a follow request to <a href="%s">%s</a>.' % (url_for('user_timeline', username=request.form['username']), request.form['username']))
+            return redirect(url_for('timeline'))
+    return render_template('request_follow.html', followuser=username, error=error)
 
 
 @app.route('/<username>/unfollow')

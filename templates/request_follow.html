@@ -8,7 +8,7 @@
       <dt>Follow User:
       <dd><input type=text name=username size=30 value="{{ followuser }}">
       <dt>For Hashtag:
-      <dd><input type=text name=email size=30 value="{{ request.form.hashtag }}">
+      <dd><input type=text name=hashtag size=30 value="{{ request.form.hashtag }}">
       <dt>Token:
       <dd><input type=text name=token size=64>
     </dl>
@@ -18,16 +18,22 @@
 {% endblock %}
 {% block footer %}
   {{ super() }}
-  <script type="text/javascript">
-    $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
 
+  <script type="text/javascript">
+    var bits = 1024;
 
     $('#generate_token').click(function(){
       $.getJSON($SCRIPT_ROOT + '/_get_public_key', {
         username : $('input:text[name=username]').val()
       }, function(data) {
-        $('input:text[name=token]').val(data.pub_key);
+        var publicKey = cryptico.publicKeyFromString(data.pub_key);
+        var hashTag = $('input:text[name=hashtag]').val();
+        var target_user = $('input:text[name=username]').val();
+
+        var requestToken = BuzzingBird.createRequestToken(hashTag, publicKey, bits, "{{ g.user.username }}", target_user);
+        $('input:text[name=token]').val(requestToken.toString(16));
       });
+      return false;
     });
   </script>
 {% endblock %}

@@ -26,6 +26,13 @@
       {% endif %}
       </div>
     {% elif request.endpoint == 'timeline' %}
+      {% if follow_requests %}
+        <ul class="follow_requests">
+        {% for fr in follow_requests %}
+         <li id="follow_request:{{ fr.username }}">You have a follow request from {{ fr.username }}. Accept? : <a href="#" class="follow_request_accept" id="{{ fr.token }}">Yes</a> <a href="#" class="follow_request_deny">No</a></li>
+        {% endfor %}
+        </ul>
+      {% endif %}
       <div class=twitbox>
         <h3>What's on your mind {{ g.user.username }}?</h3>
         <form action="{{ url_for('add_message') }}" method=post>
@@ -46,4 +53,31 @@
     <li><em>There's no message so far.</em>
   {% endfor %}
   </ul>
+{% endblock %}
+{% block footer %}
+  {{ super() }}
+  <script type="text/javascript">
+    $('.follow_request_accept').click(function(){
+      var strToken = this.id;
+      var token = new BigInteger(strToken, 16);
+
+      //Select the requesting user from the list element.
+      var requestingUser = $(this).parent().attr('id').split(":")[1];
+
+      var privateKeyPair = BuzzingBird.getPrivateKey("{{ g.user.username }}");
+      var approvedToken = BuzzingBird.approveRequestToken(privateKeyPair, token);
+
+      $.getJSON($SCRIPT_ROOT + '/_approve_token', {
+        approved_username: requestingUser,
+        approved_token: approvedToken.toString(16)
+      }, function(data){
+        if ("success" == data.result) {
+          console.log("Successfully approved follow request.");
+          $(this).hide();
+        }
+      });
+
+      return false;
+    });
+  </script>
 {% endblock %}

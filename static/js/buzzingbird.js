@@ -37,11 +37,13 @@ BuzzingBird.getPrivateKey = function(userid) {
    return rsa;
 };
 
-BuzzingBird.createRequestToken = function(hashtag, keypair, thisuser, target_user) {
+BuzzingBird.createRequestToken = function(hashtag, keypair, bits, thisuser, target_user) {
    if ("string" != typeof hashtag) {
       throw "A valid hashtag string must be passed in.";
    } else if ("object" != typeof keypair ) {
       throw "A valid RSAKey must be passed in.";
+   } else if ("number" != typeof bits) {
+      throw "A valid number of bits must be passed in.";
    } else if ("string" != typeof thisuser) {
       throw "A valid user id must be passed in for thisuser.";
    } else if ("string" != typeof target_user) {
@@ -49,7 +51,7 @@ BuzzingBird.createRequestToken = function(hashtag, keypair, thisuser, target_use
    }
 
    var randGen = new SecureRandom();
-   var r = new BigInteger(Bits, randGen);
+   var r = new BigInteger(bits, randGen);
 
    var encryptedR = keypair.doPublic(r);
    var hashedTag = sha256.hex(hashtag);
