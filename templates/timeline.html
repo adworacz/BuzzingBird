@@ -29,8 +29,15 @@
       {% if follow_requests %}
         <ul class="follow_requests">
         {% for fr in follow_requests %}
-         <li id="follow_request:{{ fr.username }}">You have a follow request from {{ fr.username }}. Accept? : <a href="#" class="follow_request_accept" id="{{ fr.token }}">Yes</a> <a href="#" class="follow_request_deny">No</a></li>
+         <li id="follow_request:{{ fr.username }}">You have a follow request from {{ fr.username }}. Approve? : <a href="#" class="follow_request_approve" id="{{ fr.token }}">Yes</a> <a href="#" class="follow_request_deny">No</a></li>
         {% endfor %}
+        </ul>
+      {% endif %}
+      {% if approved_requests %}
+        <ul class="approved_requests">
+          {% for ar in approved_requests %}
+            <li id="approved_request:{{ ar.username }}">Your follow request for <a href="{{ url_for('user_timeline', username=ar.username) }}">{{ ar.username }}</a> was approved. <a href="#" class="follow_request_accept" id ="{{ ar.token }}">Accept.</a></li>
+          {% endfor %}
         </ul>
       {% endif %}
       <div class=twitbox>
@@ -57,7 +64,8 @@
 {% block footer %}
   {{ super() }}
   <script type="text/javascript">
-    $('.follow_request_accept').click(function(){
+    // Handle follow request approval.
+    $('.follow_request_approve').click(function(){
       var strToken = this.id;
       var token = new BigInteger(strToken, 16);
 
@@ -73,11 +81,44 @@
       }, function(data){
         if ("success" == data.result) {
           console.log("Successfully approved follow request.");
-          $(this).hide();
+          $(this).parent().hide();
         }
       });
 
       return false;
     });
+
+    // Handle follow request acceptance and final token generation.
+    $('.follow_request_accept').click(function(){
+      var strToken = this.id;
+      var token = new BigInteger(strToken, 16);
+
+      //Select the username of the user to be followed.
+      var requestingUser = $(this).parent().attr('id').split(":")[1];
+
+      //Get the public key of the user to be followed.
+      $.getJSON($SCRIPT_ROOT + '/_get_public_key', {
+        username : requestingUser
+      }, function(data) {
+        var publicKey = cryptico.publicKeyFromString(data.pub_key);
+
+        var acceptedToken = BuzzingBird.acceptRequestToken(publicKey, "{{ g.user.username }}", requestingUser, token);
+
+        //Set the final acceptance token.
+        $.getJSON($SCRIPT_ROOT + '/_accept_token', {
+          username: requestingUser,
+          token: acceptedToken
+        }, function(data){
+          if ("success" == data.result) {
+            console.log("Successfully accepted follow request.");
+            $(this).parent().hide();
+          }
+        });
+
+      });
+
+      return false;
+    });
+
   </script>
 {% endblock %}

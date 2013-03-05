@@ -115,10 +115,16 @@ def timeline():
     if not g.user:
         return redirect(url_for('public_timeline'))
 
-    followRequests = query_db('''select username, token from follower, user
+    followQuery = '''select username, token from follower, user
             where follower.whom_id = ? and follower.token_status = ?
-            and follower.who_id = user.user_id''',
-            [session['user_id'], TokenStatus.REQUESTED])
+            and follower.who_id = user.user_id'''
+
+    approvedQuery = '''select username, token from follower, user
+            where follower.who_id = ? and follower.token_status = ?
+            and follower.whom_id = user.user_id'''
+
+    followRequests = query_db(followQuery, [session['user_id'], TokenStatus.REQUESTED])
+    approvedRequests = query_db(approvedQuery, [session['user_id'], TokenStatus.APPROVED])
 
     return render_template('timeline.html', messages=query_db('''
         select message.*, user.* from message, user
@@ -128,7 +134,7 @@ def timeline():
                                     where who_id = ?))
         order by message.pub_date desc limit ?''',
         [session['user_id'], session['user_id'], PER_PAGE]),
-        follow_requests=followRequests)
+        follow_requests=followRequests, approved_requests=approvedRequests)
 
 
 @app.route('/public')
@@ -168,13 +174,13 @@ def get_public_key():
     if not g.user:
         abort(401)
 
-    username = request.args.get('username', type=str)
+    following_username = request.args.get('username', type=str)
 
-    if not username:
+    if not following_username:
         abort(400)
 
     publicKey = query_db('''select user.pub_key from user
-            where username = ?''', [username], one=True)
+            where username = ?''', [following_username], one=True)
     return jsonify(pub_key=publicKey[0])
 
 
@@ -195,6 +201,29 @@ def approve_token():
     db.execute('''update follower set token_status = ?, token = ?
             where who_id = ? and whom_id = ?''',
             [TokenStatus.APPROVED, approved_token, get_user_id(approved_username), session['user_id']])
+    db.commit()
+
+    return jsonify(result="success")
+
+
+@app.route('/_accept_token', methods=['GET'])
+def accept_token():
+    '''AJAX request which accepts the final form of the follow token
+    and stores it in the DB as a form of follow registration.'''
+
+    if not g.user:
+        abort(401)
+
+    following_username = request.args.get('username', type=str)
+    following_token = request.args.get('token', type=str)
+
+    if not following_username or not following_token:
+        abort(400)
+
+    db = get_db()
+    db.execute('''update follower set token_status = ?, token = ?
+            where who_id = ? and whom_id = ?''',
+            [TokenStatus.ACCEPTED, following_token, session['user_id'], get_user_id(following_username)])
     db.commit()
 
     return jsonify(result="success")

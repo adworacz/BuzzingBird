@@ -80,12 +80,12 @@ BuzzingBird.acceptRequestToken = function(keypair, thisuser, target_user, approv
    var rtData = $.totalStorage(localStoreKey);
    var r = new BigInteger(rtData.r, 16);
 
-   var sigma = approvedToken.multiply(r.modInverse(generatedRSAKey.n)).mod(generatedRSAKey.n);
+   var sigma = approvedToken.multiply(r.modInverse(keypair.n)).mod(keypair.n);
 
-   rtData.sigma = sigma;
+   rtData.sigma = sigma.toString(16);
    $.totalStorage(localStoreKey, rtData);
 
-   return sigma;
+   return MD5(sigma.toString(16));
 };
 
 BuzzingBird.approveRequestToken = function(keypair, requestToken) {
