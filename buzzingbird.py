@@ -279,9 +279,9 @@ def add_message():
         abort(401)
     if request.form['text']:
         db = get_db()
-        db.execute('''insert into message (author_id, text, pub_date)
-          values (?, ?, ?)''', (session['user_id'], request.form['text'],
-                                int(time.time())))
+        db.execute('''insert into message (author_id, text, pub_date, token)
+          values (?, ?, ?, ?)''', (session['user_id'], request.form['text'],
+                                int(time.time()), request.form['token']))
         db.commit()
         flash('Your message was recorded')
     return redirect(url_for('timeline'))

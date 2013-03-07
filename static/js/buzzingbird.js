@@ -115,7 +115,7 @@ BuzzingBird.approveRequestToken = function(keypair, requestToken) {
 };
 
 
-BuzzingBird.computeMessageKey = function(keypair, hashtag) {
+BuzzingBird.computeSigma = function(keypair, hashtag) {
    if ("object" != typeof keypair) {
       throw "A valid RSAKey must be provided.";
    } else if ("string" != typeof hashtag) {
@@ -127,9 +127,14 @@ BuzzingBird.computeMessageKey = function(keypair, hashtag) {
    var hashedTagBigInt     = pkcs1pad2_deterministic(hashedTag, (keypair.n.bitLength() + 7) >> 3);
 
    var sigma               = keypair.doPrivate(hashedTagBigInt);
-   var messageKey          = sha1.hex(sigma.toString(16));
+   return sigma;
+};
 
-   return messageKey;
+BuzzingBird.generateToken = function(keypair, hashtag) {
+   var sigma = BuzzingBird.computeSigma(keypair, hashtag);
+   var token = MD5(sigma.toString(16));
+
+   return token;
 };
 
 BuzzingBird.encryptMessage = function(keypair, hashtag, plainMessage) {
@@ -142,7 +147,8 @@ BuzzingBird.encryptMessage = function(keypair, hashtag, plainMessage) {
       throw "A valid plainMessage must be passed in.";
    }
 
-   var messageKey          = BuzzingBird.computeMessageKey(keypair, hashtag);
+   var sigma               = BuzzingBird.computeSigma(keypair, hashtag);
+   var messageKey          = sha1.hex(sigma.toString(16));
 
    var aesKey              = BuzzingBird.generateAESKeyFromHash(messageKey);
    var encryptedMessage    = cryptico.encryptAESCBC(plainMessage, aesKey);
@@ -164,5 +170,14 @@ BuzzingBird.decryptMessage = function(sigmaString, encryptedMessage) {
    var decryptedMessage    = cryptico.decryptAESCBC(encryptedMessage, aesKey);
 
    return decryptedMessage;
+};
+
+BuzzingBird.getHashTagsFromTweet = function(tweet) {
+   return tweet.match(/#\w*\d*/g);
+};
+
+BuzzingBird.getFirstHashtagFromTweet = function(tweet) {
+   var tweets = BuzzingBird.getHashTagsFromTweet(tweet);
+   return tweets === null ? null : tweets[0];
 };
 

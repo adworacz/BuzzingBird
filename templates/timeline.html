@@ -42,8 +42,10 @@
       {% endif %}
       <div class=twitbox>
         <h3>What's on your mind {{ g.user.username }}?</h3>
-        <form action="{{ url_for('add_message') }}" method=post>
-          <p><input type=text name=text size=60><!--
+        <form action="{{ url_for('add_message') }}" method=post id="tweet_form">
+          <p>
+            <input type=hidden name=token>
+            <input type=text name=text size=60><!--
           --><input type=submit value="Share">
         </form>
       </div>
@@ -118,6 +120,25 @@
       });
 
       return false;
+    });
+
+    //Handle actual tweet encryption using the first available hashtag.
+    $('#tweet_form').submit(function(){
+      var plainTweet = $('input:text[name=text]').val();
+      console.log("Plain tweet : " + plainTweet);
+
+      var hashtag = BuzzingBird.getFirstHashtagFromTweet(plainTweet);
+
+      if (hashtag !== null) {
+        var privateKeyPair = BuzzingBird.getPrivateKey("{{ g.user.username }}");
+        var token = BuzzingBird.generateToken(privateKeyPair, hashtag);
+
+        var encryptedTweet = BuzzingBird.encryptMessage(privateKeyPair, hashtag, plainTweet);
+        console.log("Encrypted tweet : " + encryptedTweet);
+
+        $('input:text[name=text]').val(encryptedTweet);
+        $('input:hidden[name=token]').val(token);
+      }
     });
 
   </script>
