@@ -101,7 +101,14 @@ BuzzingBird.acceptRequestToken = function(keypair, thisuser, target_user, approv
 
    var sigma = approvedToken.multiply(r.modInverse(keypair.n)).mod(keypair.n);
 
-   rtData.sigma = sigma.toString(16);
+   var sigmas = rtData.sigmas;
+   if (sigmas == null) {
+      sigmas = [];
+   }
+
+   sigmas.push(sigma.toString(16));
+   rtData.sigmas = sigmas;
+
    $.totalStorage(localStoreKey, rtData);
 
    return MD5(sigma.toString(16));
@@ -160,7 +167,7 @@ BuzzingBird.decryptMessage = function(sigmaString, encryptedMessage) {
    //Decrypt a message using a key generated from a pre-stored sigma string.
    if ("string" != typeof sigmaString) {
       throw "A valid hashtag must be passed in.";
-   } else if ("string" != typeof message) {
+   } else if ("string" != typeof encryptedMessage) {
       throw "A valid message must be passed in.";
    }
 
@@ -179,5 +186,22 @@ BuzzingBird.getHashTagsFromTweet = function(tweet) {
 BuzzingBird.getFirstHashtagFromTweet = function(tweet) {
    var tweets = BuzzingBird.getHashTagsFromTweet(tweet);
    return tweets === null ? null : tweets[0];
+};
+
+BuzzingBird.recoverSigmaForToken = function(thisuser, target_user, token) {
+   //Obtain the sigma from local storage that will produce the given token.
+   //This will then be used to decrypt each tweet in .decryptMessage().
+   var localStoreKey = this.requestTokenPrefix + thisuser + "_" + target_user;
+   var subscriptionData = $.totalStorage(localStoreKey);
+   var sigmas = subscriptionData.sigmas;
+
+   //TODO: add support for multiple hashtags/sigmas.
+   for(var i = 0, n = sigmas.length; i < n; i++) {
+      if (MD5(sigmas[i]) === token) {
+         return sigmas[i];
+      }
+   }
+
+   return null;
 };
 

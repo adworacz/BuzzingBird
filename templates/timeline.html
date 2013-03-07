@@ -53,10 +53,11 @@
   {% endif %}
   <ul class=messages>
   {% for message in messages %}
-    <li><img src="{{ message.email|gravatar(size=48) }}"><p>
+    <li><img src="{{ message.email|gravatar(size=48) }}">
       <strong><a href="{{ url_for('user_timeline', username=message.username)
       }}">{{ message.username }}</a></strong>
-      {{ message.text }}
+      <span class="hidden">{{ message.token }}</span>
+      <p>{{ message.text }}</p>
       <small>&mdash; {{ message.pub_date|datetimeformat }}</small>
   {% else %}
     <li><em>There's no message so far.</em>
@@ -139,6 +140,21 @@
         $('input:text[name=text]').val(encryptedTweet);
         $('input:hidden[name=token]').val(token);
       }
+    });
+
+    //Handle decryption of tweets when the document is fully loaded.
+    $(document).ready(function(){
+      $('.messages li').each(function(){
+        var token = $(this).children('.hidden').text();
+        var target_user = $(this).find('a').text();
+        var sigma = BuzzingBird.recoverSigmaForToken("{{ g.user.username }}", target_user, token);
+
+        if (sigma != null) {
+          var encryptedMessage = $(this).children('p').text();
+          var decryptedMessage = BuzzingBird.decryptMessage(sigma, encryptedMessage);
+          $(this).children('p').text(decryptedMessage);
+        }
+      });
     });
 
   </script>

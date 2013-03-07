@@ -131,7 +131,8 @@ def timeline():
         where message.author_id = user.user_id and (
             user.user_id = ? or
             user.user_id in (select whom_id from follower
-                                    where who_id = ?))
+                                    where message.token = follower.token
+                                    and who_id = ?))
         order by message.pub_date desc limit ?''',
         [session['user_id'], session['user_id'], PER_PAGE]),
         follow_requests=followRequests, approved_requests=approvedRequests)
