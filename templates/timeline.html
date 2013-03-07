@@ -84,7 +84,7 @@
       }, function(data){
         if ("success" == data.result) {
           console.log("Successfully approved follow request.");
-          $(this).parent().hide();
+          $('.follow_request_approve').parent().hide();
         }
       });
 
@@ -114,7 +114,7 @@
         }, function(data){
           if ("success" == data.result) {
             console.log("Successfully accepted follow request.");
-            $(this).parent().hide();
+            $('.follow_request_accept').parent().hide();
           }
         });
 
