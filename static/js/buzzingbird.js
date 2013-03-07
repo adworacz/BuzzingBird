@@ -132,35 +132,33 @@ BuzzingBird.computeMessageKey = function(keypair, hashtag) {
    return messageKey;
 };
 
-BuzzingBird.encryptMessage = function(keypair, hashtag, message) {
+BuzzingBird.encryptMessage = function(keypair, hashtag, plainMessage) {
    //Encrypt a message using a key generated from a message's hashtag.
    if ("object" != typeof keypair) {
       throw "A valid RSAKey must be provided.";
    } else if ("string" != typeof hashtag) {
       throw "A valid hashtag must be passed in.";
-   } else if ("string" != typeof message) {
-      throw "A valid message must be passed in.";
+   } else if ("string" != typeof plainMessage) {
+      throw "A valid plainMessage must be passed in.";
    }
 
    var messageKey          = BuzzingBird.computeMessageKey(keypair, hashtag);
 
    var aesKey              = BuzzingBird.generateAESKeyFromHash(messageKey);
-   var encryptedMessage    = cryptico.encryptAESCBC(message, aesKey);
+   var encryptedMessage    = cryptico.encryptAESCBC(plainMessage, aesKey);
 
    return encryptedMessage;
 };
 
-BuzzingBird.decryptMessage = function(keypair, hashtag, encryptedMessage) {
-   //Decrypt a message using a key generated from a message's hashtag.
-   if ("object" != typeof keypair) {
-      throw "A valid RSAKey must be provided.";
-   } else if ("string" != typeof hashtag) {
+BuzzingBird.decryptMessage = function(sigmaString, encryptedMessage) {
+   //Decrypt a message using a key generated from a pre-stored sigma string.
+   if ("string" != typeof sigmaString) {
       throw "A valid hashtag must be passed in.";
    } else if ("string" != typeof message) {
       throw "A valid message must be passed in.";
    }
 
-   var messageKey          = BuzzingBird.computeMessageKey(keypair, hashtag);
+   var messageKey          = sha1.hex(sigmaString);
 
    var aesKey              = BuzzingBird.generateAESKeyFromHash(messageKey);
    var decryptedMessage    = cryptico.decryptAESCBC(encryptedMessage, aesKey);
