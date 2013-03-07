@@ -185,11 +185,11 @@ ul.flashes li {
     margin: 0 0 2px;
 }
 
-.follow_requests {
+.follow_requests, .approved_requests {
     list-style: none;
 }
 
-.follow_requests li {
+.follow_requests li, .approved_requests li {
     background: #B9F3ED;
     border: 1px solid #81CEC6;
     -moz-border-radius: 2px;
