@@ -7,6 +7,9 @@
 
     :copyright: (c) 2010 by Armin Ronacher.
     :license: BSD, see LICENSE for more details.
+
+    NOTE: These tests have NOT been updated to support BuzzingBird, so
+    there is no claim that they actually run with its modifications.
 """
 import os
 import buzzingbird
