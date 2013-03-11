@@ -4,21 +4,21 @@
            because writing todo lists is not fun
 
 
-    ~ What is MiniTwit?
+    ~ What is BuzzingBird?
 
-      A SQLite and Flask powered Hummingbird (encrypted twitter) clone, based off of MiniTwit.
+      A SQLite and Flask powered Hummingbird (encrypted twitter clone), based off of MiniTwit.
 
     ~ How do I use it?
 
-      1. edit the configuration in the minitwit.py file or
-         export an MINITWIT_SETTINGS environment variable
+      1. edit the configuration in the buzzingbird.py file or
+         export an BUZZINGBIRD_SETTINGS environment variable
          pointing to a configuration file.
 
       2. fire up a python shell and run this:
 
-         >>> from minitwit import init_db; init_db()
+         >>> from buzzingbird import init_db; init_db()
 
-      3. now you can run the minitwit.py file with your
+      3. now you can run the buzzingbird.py file with your
          python interpreter and the application will
          greet you on http://localhost:5000/
 
