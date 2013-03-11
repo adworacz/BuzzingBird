@@ -252,7 +252,7 @@ def follow_user(username):
             db.execute('''insert into follower (who_id, whom_id, token_status, token) values (?, ?, ?, ?)''',
                 [session['user_id'], whom_id, TokenStatus.REQUESTED, request.form['token']])
             db.commit()
-            flash('You successfully submitted a follow request to <a href="%s">%s</a>.' % (url_for('user_timeline', username=request.form['username']), request.form['username']))
+            flash('You successfully submitted a follow request to %s.' % request.form['username'])
             return redirect(url_for('timeline'))
     return render_template('request_follow.html', followuser=username, error=error)
 
@@ -356,6 +356,6 @@ app.jinja_env.filters['gravatar'] = gravatar_url
 
 
 if __name__ == '__main__':
-    # init_db()
+    #init_db()
     app.debug = DEBUG
     app.run()
