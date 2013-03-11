@@ -26,3 +26,8 @@
 
       You betcha.  Run the `minitwit_tests.py` file to
       see the tests pass.
+
+    ~ This was written as a proof of concept for a Graduate Security course at Cal Poly State
+      University, San Luis Obispo. It is not feature complete and probably never will be. It
+      was built to show that idea behind Hummingbird (an encrypted twitter) could be implemented
+      without a Java-backed Firefox plugin, and instead uses just Javascript.
